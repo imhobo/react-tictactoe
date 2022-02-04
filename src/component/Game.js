@@ -10,6 +10,7 @@ const pStyle = {
     color: 'green'
 }
 
+var turns = 0;
 
 
 
@@ -28,6 +29,7 @@ function Game() {
         layoutState[i] = xIsNext ? 'X' : 'O';
         setLayout(layoutState);
         setXisNext(!xIsNext);
+        turns+=1;
     }
 
    
@@ -36,8 +38,8 @@ function Game() {
         <React.Fragment>
             <Layout boxes={layout} onClick={handleClick} />
             <div style={styles}>
-                <p style={pStyle}>{winner ? 'Winner: ' + winner : 'Next Player '
-                    + (xIsNext ? 'X' : 'O')}
+                <p style={pStyle}>{winner ? 'Winner: ' + winner : (turns === 9 ? 'Phew! The Draw logic works' : 'Next Player '
+                    + (xIsNext ? 'X' : 'O'))}
                 </p>
                 
             </div>
