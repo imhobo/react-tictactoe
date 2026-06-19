@@ -13,6 +13,8 @@ jobs:
     runs-on: oci-1
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+        with:
+          persist-credentials: false
       - name: Setup Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
         with:
@@ -40,6 +42,6 @@ jobs:
           path: ./
       - name: Deploy to web server
         run: |
-          rm -rf /var/www/webgame/*
-          cp -r build/* /var/www/webgame/
+          sudo rm -rf /var/www/webgame/*
+          sudo cp -r build/* /var/www/webgame/
           echo "✅ Deployed to tic.babymonks.com"
