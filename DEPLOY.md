@@ -1,4 +1,4 @@
 # react-tictactoe
 
-Deployed via webhook from oci-1.
-Build and push test: $(date -u)
+Webhook deploy test v2
+Deployed via: push webhook -> build on oci-1 -> push to droplet
