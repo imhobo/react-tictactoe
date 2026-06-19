@@ -6,9 +6,10 @@ const styles = {
     width: '200px',
     margin: '20px auto',
 };
+
 const pStyle = {
-    color: 'green'
-}
+    color: 'var(--status-color, green)',
+};
 
 const confettiColors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ff8800', '#8800ff'];
 
@@ -20,6 +21,7 @@ function Game() {
     const [turns, setTurns] = useState(0);
     const [computerThinking, setComputerThinking] = useState(false);
     const [confetti, setConfetti] = useState([]);
+    const [darkMode, setDarkMode] = useState(false);
     const winner = checkWinner(layout);
     const gameRef = useRef(null);
 
@@ -107,21 +109,45 @@ function Game() {
         padding: '8px 16px',
         margin: '0 5px',
         cursor: 'pointer',
-        border: '1px solid #ccc',
+        border: '1px solid var(--box-border, #ccc)',
         borderRadius: '4px',
         fontSize: '14px',
+        backgroundColor: 'var(--btn-bg, #f0f0f0)',
+        color: 'var(--btn-text, #333)',
     };
 
     const activeBtnStyle = {
         ...btnStyle,
-        backgroundColor: '#4CAF50',
-        color: 'white',
+        backgroundColor: 'var(--btn-active-bg, #4CAF50)',
+        color: 'var(--btn-active-text, white)',
     };
 
     const gameOver = winner || turns === 9;
 
+    const toggleStyle = {
+        position: 'absolute',
+        top: '10px',
+        right: '10px',
+        padding: '8px 12px',
+        fontSize: '20px',
+        cursor: 'pointer',
+        border: '1px solid var(--box-border, #ccc)',
+        borderRadius: '6px',
+        backgroundColor: 'var(--toggle-bg, #e0e0e0)',
+        color: 'var(--toggle-text, #333)',
+        lineHeight: 1,
+        zIndex: 1001,
+    };
+
     return (
-        <div ref={gameRef}>
+        <div ref={gameRef} data-theme={darkMode ? 'dark' : 'light'} style={{ position: 'relative', backgroundColor: 'var(--app-bg, #ffffff)', minHeight: '100vh', paddingTop: '10px' }}>
+            <button
+                style={toggleStyle}
+                onClick={() => setDarkMode(!darkMode)}
+                title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            >
+                {darkMode ? '☀️' : '🌙'}
+            </button>
             {confetti.map(p => (
                 <div
                     key={p.id}
@@ -165,10 +191,10 @@ function Game() {
                             padding: '10px 20px',
                             fontSize: '16px',
                             cursor: 'pointer',
-                            border: '2px solid #4CAF50',
+                            border: '2px solid var(--play-again-bg, #4CAF50)',
                             borderRadius: '4px',
-                            backgroundColor: '#4CAF50',
-                            color: 'white',
+                            backgroundColor: 'var(--play-again-bg, #4CAF50)',
+                            color: 'var(--play-again-text, white)',
                             animation: 'fade-in 0.5s ease-out',
                             display: 'block',
                             margin: '10px auto',
@@ -180,7 +206,7 @@ function Game() {
                 )}
             </div>
         </div>
-    )
+    );
 }
 
 export default Game;

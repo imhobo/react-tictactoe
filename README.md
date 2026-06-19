@@ -1,70 +1,113 @@
-# Getting Started with Create React App
+<div align="center">
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# 🎮 Tic-Tac-Toe
 
-## Available Scripts
+### A classic Tic-Tac-Toe game built with React — play with a friend or challenge the AI!
 
-In the project directory, you can run:
+[![GitHub Actions Status](https://github.com/imhobo/react-tictactoe/actions/workflows/deploy.yml/badge.svg)](https://github.com/imhobo/react-tictactoe/actions/workflows/deploy.yml)
+[![Live Demo](https://img.shields.io/badge/demo-tic.babymonks.com-brightgreen)](https://tic.babymonks.com)
+[![React](https://img.shields.io/badge/react-17.0.2-61DAFB?logo=react)](https://reactjs.org/)
+[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-### `npm start`
+**[🌐 Live Demo → tic.babymonks.com](https://tic.babymonks.com)**
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+</div>
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+---
 
-### `npm test`
+## ✨ Features
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- **👥 2-Player Mode** — Pass-and-play with a friend on the same device.
+- **🤖 1-Player vs AI** — Challenge an unbeatable(ish) computer opponent with smart move selection.
+- **🎊 Celebration Effects** — Confetti rain and a glowing "Winner" announcement when you win.
+- **🏆 Winning Highlight** — The winning line lights up with a gold glow.
+- **🔄 Play Again** — Quick reset button after every game, win or draw.
+- **📱 Responsive** — Works on desktop and mobile browsers.
 
-### `npm run build`
+---
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## 🚀 Live Demo
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Try it right now: **[tic.babymonks.com](https://tic.babymonks.com)**
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+---
 
-### `npm run eject`
+## 🛠️ Tech Stack
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+| Tech | Version |
+|---|---|
+| [React](https://reactjs.org/) | 17.0.2 |
+| [Create React App](https://create-react-app.dev/) | 5.0.0 |
+| Node.js | 20 (CI) |
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+---
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## 📦 Getting Started
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### Prerequisites
 
-## Learn More
+- [Node.js](https://nodejs.org/) >= 14
+- npm (ships with Node.js)
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### Installation
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```bash
+# Clone the repository
+git clone https://github.com/imhobo/react-tictactoe.git
+cd react-tictactoe
 
-### Code Splitting
+# Install dependencies
+npm install
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+# Start the development server
+npm start
+```
 
-### Analyzing the Bundle Size
+Open [http://localhost:3000](http://localhost:3000) to see the app in your browser. The page will reload when you make changes.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### Production Build
 
-### Making a Progressive Web App
+```bash
+npm run build
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+Builds the app for production to the `build/` folder. It correctly bundles React in production mode and optimizes the build for the best performance.
 
-### Advanced Configuration
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## 🔁 CI/CD
 
-### Deployment
+This project uses **GitHub Actions** for continuous integration and deployment. Every push to the `main` branch triggers an automated workflow that:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+1. Installs dependencies (`npm ci`)
+2. Builds the production bundle (`npm run build`)
+3. Deploys to **[tic.babymonks.com](https://tic.babymonks.com)**
 
-### `npm run build` fails to minify
+The workflow file lives at `.github/workflows/deploy.yml`.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Here's how you can help:
+
+1. 🍴 Fork the repository
+2. 🌿 Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. 💻 Make your changes
+4. ✅ Commit (`git commit -m 'Add amazing feature'`)
+5. 📤 Push (`git push origin feature/amazing-feature`)
+6. 🔀 Open a Pull Request
+
+Please make sure your code follows the existing style and passes any lint checks.
+
+---
+
+## 📄 License
+
+Distributed under the **MIT License**. See [LICENSE](LICENSE) for more information.
+
+---
+
+<div align="center">
+  Made with ❤️ by <a href="https://github.com/imhobo">imhobo</a>
+</div>
