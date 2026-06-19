@@ -1,4 +1,4 @@
 # react-tictactoe
 
-Webhook deploy test v3
-Build + push via hermes-push.sh through credential proxy
+Webhook deploy test v4
+PATH fixed for npm
