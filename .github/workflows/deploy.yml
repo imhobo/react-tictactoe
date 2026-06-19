@@ -39,7 +39,7 @@ jobs:
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         with:
           name: build-output
-          path: ./
+          path: build/
       - name: Deploy to web server
         run: |
           rm -rf /var/www/webgame/*
