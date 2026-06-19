@@ -1,8 +1,8 @@
 import React from 'react';
-function Box({ value, onClick }) {
+function Box({ value, onClick, isWinning }) {
     return (
         <button
-            style={style}
+            style={isWinning ? { ...winningStyle } : style}
             onClick={onClick}>
             {value}
         </button>
@@ -17,4 +17,14 @@ const style = {
     fontWeight: '800',
     cursor: 'pointer',
     outline: 'none'
+}
+
+const winningStyle = {
+    background: '#fff',
+    border: '3px solid gold',
+    fontSize: '30px',
+    fontWeight: '800',
+    cursor: 'pointer',
+    outline: 'none',
+    boxShadow: '0 0 10px gold'
 }
