@@ -13,13 +13,35 @@ steps:
     commands:
       - npm run build
 
+  - name: artifact
+    image: bash
+    commands:
+      - ARTIFACT_VERSION="${CI_PIPELINE_NUMBER:-0}-$(date +%Y%m%d)"
+      - ARTIFACT_NAME="react-tictactoe-build-${ARTIFACT_VERSION}"
+      - ARTIFACT_FILE="${ARTIFACT_NAME}.tar.gz"
+      - cd build && tar czf "/tmp/${ARTIFACT_FILE}" .
+      - cd /tmp
+      - |
+        gh auth status 2>/dev/null || gh auth login --with-token <<< "${GITHUB_TOKEN}"
+      - |
+        gh release create "${ARTIFACT_NAME}" \
+          "/tmp/${ARTIFACT_FILE}#${ARTIFACT_FILE}" \
+          --repo imhobo/react-tictactoe \
+          --title "Build ${ARTIFACT_VERSION}" \
+          --notes "Auto-built from commit ${CI_COMMIT_SHA:-unknown}" \
+          --generate-notes 2>/dev/null || \
+        gh release upload "${ARTIFACT_NAME}" \
+          "/tmp/${ARTIFACT_FILE}#${ARTIFACT_FILE}" \
+          --repo imhobo/react-tictactoe \
+          --clobber
+      - rm -f "/tmp/${ARTIFACT_FILE}"
+
   - name: deploy
     image: bash
     commands:
       - echo "Deploying to droplet..."
-      - hermes-ssh.sh droplet "rm -rf /var/www/webgame/*"
       - tar czf /tmp/webgame.tar.gz -C build .
       - hermes-push.sh droplet /tmp/webgame.tar.gz /tmp/webgame.tar.gz
-      - hermes-ssh.sh droplet "tar xzf /tmp/webgame.tar.gz -C /var/www/webgame/ && rm /tmp/webgame.tar.gz"
+      - hermes-ssh.sh droplet "rm -rf /var/www/webgame/* && tar xzf /tmp/webgame.tar.gz -C /var/www/webgame/ && rm /tmp/webgame.tar.gz"
       - rm -f /tmp/webgame.tar.gz
       - echo "Deployed to tic.babymonks.com"

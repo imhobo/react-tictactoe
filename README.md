@@ -1,15 +1,14 @@
 <div align="center">
 
-# 🎮 Tic-Tac-Toe
+# ✦ Tic-Tac-Toe
 
-### A classic Tic-Tac-Toe game built with React — play with a friend or challenge the AI!
+### A beautifully crafted Tic-Tac-Toe game — play with a friend or challenge the AI.
 
-[![GitHub Actions Status](https://github.com/imhobo/react-tictactoe/actions/workflows/deploy.yml/badge.svg)](https://github.com/imhobo/react-tictactoe/actions/workflows/deploy.yml)
 [![Live Demo](https://img.shields.io/badge/demo-tic.babymonks.com-brightgreen)](https://tic.babymonks.com)
 [![React](https://img.shields.io/badge/react-17.0.2-61DAFB?logo=react)](https://reactjs.org/)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-**[🌐 Live Demo → tic.babymonks.com](https://tic.babymonks.com)**
+**[🌐 Play Now → tic.babymonks.com](https://tic.babymonks.com)**
 
 </div>
 
@@ -18,11 +17,13 @@
 ## ✨ Features
 
 - **👥 2-Player Mode** — Pass-and-play with a friend on the same device.
-- **🤖 1-Player vs AI** — Challenge an unbeatable(ish) computer opponent with smart move selection.
-- **🎊 Celebration Effects** — Confetti rain and a glowing "Winner" announcement when you win.
-- **🏆 Winning Highlight** — The winning line lights up with a gold glow.
-- **🔄 Play Again** — Quick reset button after every game, win or draw.
-- **📱 Responsive** — Works on desktop and mobile browsers.
+- **🤖 vs AI** — Challenge an unbeatable minimax AI opponent.
+- **🏆 Score Tracking** — X wins, O wins, and draws persist across sessions via localStorage.
+- **↩️ Undo** — Undo your last move in 2-player mode.
+- **🎊 Celebration** — Confetti rain when a game ends.
+- **✨ Animated X & O** — Buttery-smooth CSS-drawn X and O with draw animations.
+- **🎨 Gradient Glassmorphism** — Elegant dark gradient with glass card board.
+- **📱 Mobile-First** — Responsive layout that looks great on any screen.
 
 ---
 
@@ -35,7 +36,7 @@ Try it right now: **[tic.babymonks.com](https://tic.babymonks.com)**
 ## 🛠️ Tech Stack
 
 | Tech | Version |
-|---|---|
+|------|---------|
 | [React](https://reactjs.org/) | 17.0.2 |
 | [Create React App](https://create-react-app.dev/) | 5.0.0 |
 | Node.js | 20 (CI) |
@@ -63,7 +64,7 @@ npm install
 npm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to see the app in your browser. The page will reload when you make changes.
+Open [http://localhost:3000](http://localhost:3000) to see the app. The page will reload when you make changes.
 
 ### Production Build
 
@@ -71,34 +72,20 @@ Open [http://localhost:3000](http://localhost:3000) to see the app in your brows
 npm run build
 ```
 
-Builds the app for production to the `build/` folder. It correctly bundles React in production mode and optimizes the build for the best performance.
+Builds the app for production to the `build/` folder. It bundles React in production mode and optimises for the best performance.
 
 ---
 
 ## 🔁 CI/CD
 
-This project uses **GitHub Actions** for continuous integration and deployment. Every push to the `main` branch triggers an automated workflow that:
+This project uses **Woodpecker CI** with a local runner. Every push to `main` triggers:
 
-1. Installs dependencies (`npm ci`)
-2. Builds the production bundle (`npm run build`)
-3. Deploys to **[tic.babymonks.com](https://tic.babymonks.com)**
+1. `install` — npm ci
+2. `build` — Production bundle
+3. `artifact` — Uploads `react-tictactoe-build-{PIPELINE_NUM}-{YYYYMMDD}.tar.gz` to GitHub Releases
+4. `deploy` — Ships the build to **[tic.babymonks.com](https://tic.babymonks.com)**
 
-The workflow file lives at `.github/workflows/deploy.yml`.
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Here's how you can help:
-
-1. 🍴 Fork the repository
-2. 🌿 Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. 💻 Make your changes
-4. ✅ Commit (`git commit -m 'Add amazing feature'`)
-5. 📤 Push (`git push origin feature/amazing-feature`)
-6. 🔀 Open a Pull Request
-
-Please make sure your code follows the existing style and passes any lint checks.
+The pipeline config lives at `.woodpecker.yml`.
 
 ---
 

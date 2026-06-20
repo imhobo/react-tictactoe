@@ -1,212 +1,252 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { checkWinner, getComputerMove } from './Logic';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { checkWinner, getWinningLine, getComputerMove } from './Logic';
 import Layout from './Layout';
 
-const styles = {
-    width: '200px',
-    margin: '20px auto',
-};
+const STORAGE_KEY = 'tictactoe_scores';
 
-const pStyle = {
-    color: 'var(--status-color, green)',
-};
+function loadScores() {
+  try {
+    const data = localStorage.getItem(STORAGE_KEY);
+    return data ? JSON.parse(data) : { X: 0, O: 0, draw: 0 };
+  } catch {
+    return { X: 0, O: 0, draw: 0 };
+  }
+}
 
-const confettiColors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ff8800', '#8800ff'];
+function saveScores(scores) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(scores));
+  } catch { /* noop */ }
+}
 
-function Game() {
+function Game({ onScoreUpdate }) {
+  const [layout, setLayout] = useState(Array(9).fill(null));
+  const [xIsNext, setXIsNext] = useState(true);
+  const [mode, setMode] = useState('2player');
+  const [turns, setTurns] = useState(0);
+  const [computerThinking, setComputerThinking] = useState(false);
+  const [confetti, setConfetti] = useState([]);
+  const [scores, setScores] = useState(loadScores);
+  const [history, setHistory] = useState([]); // stack of { layout, xIsNext, turns }
+  const confettiId = useRef(0);
 
-    const [layout, setLayout] = useState(Array(9).fill(null));
-    const [xIsNext, setXisNext] = useState(true);
-    const [mode, setMode] = useState('2player');
-    const [turns, setTurns] = useState(0);
-    const [computerThinking, setComputerThinking] = useState(false);
-    const [confetti, setConfetti] = useState([]);
-    const [darkMode, setDarkMode] = useState(false);
-    const winner = checkWinner(layout);
-    const gameRef = useRef(null);
+  const winner = checkWinner(layout);
+  const winningLine = winner ? getWinningLine(layout) : [];
+  const isDraw = !winner && turns === 9;
+  const gameOver = winner || isDraw;
+  const canUndo = mode === '2player' && history.length > 0 && !gameOver && !computerThinking;
 
-    const getWinningLine = (boxes) => {
-        const lines = [
-            [0, 1, 2], [3, 4, 5], [6, 7, 8],
-            [0, 3, 6], [1, 4, 7], [2, 5, 8],
-            [0, 4, 8], [2, 4, 6],
-        ];
-        for (let line of lines) {
-            const [x, y, z] = line;
-            if (boxes[x] && boxes[x] === boxes[y] && boxes[x] === boxes[z]) {
-                return line;
-            }
-        }
-        return [];
-    };
+  // ── Confetti ──
+  useEffect(() => {
+    if (!gameOver) {
+      setConfetti([]);
+      return;
+    }
+    confettiId.current += 1;
+    const id = confettiId.current;
+    const colors = ['#4FC3F7', '#FF6B6B', '#FFD700', '#FF8A65', '#CE93D8', '#81C784', '#FFD54F'];
+    const pieces = Array.from({ length: 40 }, (_, i) => ({
+      id: `${id}-${i}`,
+      left: Math.random() * 100,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      size: Math.random() * 8 + 6,
+      delay: Math.random() * 0.8,
+      duration: Math.random() * 1.5 + 2,
+      round: Math.random() > 0.5,
+    }));
+    setConfetti(pieces);
+  }, [gameOver]);
 
-    const winningLine = winner ? getWinningLine(layout) : [];
+  // ── Score tracking ──
+  useEffect(() => {
+    if (!gameOver) return;
+    const key = winner || 'draw';
+    if (key && scores[key] !== undefined) {
+      const next = { ...scores, [key]: scores[key] + 1 };
+      setScores(next);
+      saveScores(next);
+    }
+    // Only fire once per game end
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameOver]);
 
-    useEffect(() => {
-        if (winner || turns === 9) {
-            const particles = [];
-            for (let i = 0; i < 30; i++) {
-                particles.push({
-                    id: i,
-                    left: Math.random() * 100,
-                    color: confettiColors[Math.floor(Math.random() * confettiColors.length)],
-                    size: Math.random() * 10 + 5,
-                    delay: Math.random() * 2,
-                    duration: Math.random() * 2 + 2,
-                    round: Math.random() > 0.5,
-                });
-            }
-            setConfetti(particles);
-        } else {
-            setConfetti([]);
-        }
-    }, [winner, turns]);
+  const resetGame = useCallback(() => {
+    setLayout(Array(9).fill(null));
+    setXIsNext(true);
+    setTurns(0);
+    setComputerThinking(false);
+    setConfetti([]);
+    setHistory([]);
+  }, []);
 
-    const resetGame = () => {
-        setLayout(Array(9).fill(null));
-        setXisNext(true);
-        setTurns(0);
-        setComputerThinking(false);
-        setConfetti([]);
-    };
+  const handleModeChange = useCallback((newMode) => {
+    setMode(newMode);
+    resetGame();
+  }, [resetGame]);
 
-    const handleModeChange = (newMode) => {
-        setMode(newMode);
-        resetGame();
-    };
+  const handleClick = useCallback((i) => {
+    if (winner || layout[i] || computerThinking || isDraw) return;
 
-    const handleClick = (i) => {
-        if (winner || layout[i] || computerThinking) return;
-        const layoutState = [...layout];
-        layoutState[i] = xIsNext ? 'X' : 'O';
-        setLayout(layoutState);
-        setXisNext(!xIsNext);
+    // Save current state for undo
+    setHistory(prev => [...prev, { layout: [...layout], xIsNext, turns }]);
+
+    const next = [...layout];
+    next[i] = xIsNext ? 'X' : 'O';
+    setLayout(next);
+    setXIsNext(!xIsNext);
+    setTurns(t => t + 1);
+  }, [winner, layout, computerThinking, isDraw, xIsNext, turns]);
+
+  const handleUndo = useCallback(() => {
+    if (history.length === 0 || gameOver || computerThinking) return;
+    const prev = history[history.length - 1];
+    setLayout(prev.layout);
+    setXIsNext(prev.xIsNext);
+    setTurns(prev.turns);
+    setHistory(h => h.slice(0, -1));
+  }, [history, gameOver, computerThinking]);
+
+  // ── Computer turn ──
+  useEffect(() => {
+    if (
+      mode !== '1player' ||
+      xIsNext ||
+      winner ||
+      isDraw ||
+      computerThinking
+    ) return;
+
+    setComputerThinking(true);
+    const timer = setTimeout(() => {
+      const move = getComputerMove([...layout]);
+      if (move !== null) {
+        setHistory(prev => [...prev, { layout: [...layout], xIsNext, turns }]);
+        const next = [...layout];
+        next[move] = 'O';
+        setLayout(next);
+        setXIsNext(true);
         setTurns(t => t + 1);
-    };
+      }
+      setComputerThinking(false);
+    }, 400);
 
-    useEffect(() => {
-        if (mode === '1player' && !xIsNext && !winner && turns < 9) {
-            setComputerThinking(true);
-            const timer = setTimeout(() => {
-                const computerMove = getComputerMove(layout);
-                if (computerMove !== null) {
-                    const newLayout = [...layout];
-                    newLayout[computerMove] = 'O';
-                    setLayout(newLayout);
-                    setXisNext(true);
-                    setTurns(t => t + 1);
-                }
-                setComputerThinking(false);
-            }, 500);
-            return () => {
-                clearTimeout(timer);
-                setComputerThinking(false);
-            };
-        }
-    }, [mode, xIsNext, winner, layout, turns]);
+    return () => { clearTimeout(timer); setComputerThinking(false); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, xIsNext, winner, isDraw, computerThinking]);
 
-    const btnStyle = {
-        padding: '8px 16px',
-        margin: '0 5px',
-        cursor: 'pointer',
-        border: '1px solid var(--box-border, #ccc)',
-        borderRadius: '4px',
-        fontSize: '14px',
-        backgroundColor: 'var(--btn-bg, #f0f0f0)',
-        color: 'var(--btn-text, #333)',
-    };
+  // ── Status text ──
+  let statusText = '';
+  let statusClass = '';
+  if (winner) {
+    statusText = `🎉 ${winner} wins!`;
+    statusClass = 'winner';
+  } else if (isDraw) {
+    statusText = "It's a draw!";
+    statusClass = 'draw';
+  } else if (computerThinking) {
+    statusText = '🤔 Computer is thinking...';
+    statusClass = 'thinking';
+  } else {
+    statusText = `${xIsNext ? 'X' : 'O'}'s turn`;
+    statusClass = xIsNext ? 'next-x' : 'next-o';
+  }
 
-    const activeBtnStyle = {
-        ...btnStyle,
-        backgroundColor: 'var(--btn-active-bg, #4CAF50)',
-        color: 'var(--btn-active-text, white)',
-    };
+  return (
+    <div className="app-container">
+      {/* Confetti */}
+      {confetti.map(p => (
+        <div
+          key={p.id}
+          className="confetti-piece"
+          style={{
+            left: `${p.left}%`,
+            width: p.size,
+            height: p.size,
+            background: p.color,
+            borderRadius: p.round ? '50%' : 2,
+            animationDelay: `${p.delay}s`,
+            animationDuration: `${p.duration}s`,
+          }}
+        />
+      ))}
 
-    const gameOver = winner || turns === 9;
+      {/* Header */}
+      <div className="header">
+        <span className="header-icon">✦</span>
+        <h1>Tic-Tac-Toe</h1>
+      </div>
 
-    const toggleStyle = {
-        position: 'absolute',
-        top: '10px',
-        right: '10px',
-        padding: '8px 12px',
-        fontSize: '20px',
-        cursor: 'pointer',
-        border: '1px solid var(--box-border, #ccc)',
-        borderRadius: '6px',
-        backgroundColor: 'var(--toggle-bg, #e0e0e0)',
-        color: 'var(--toggle-text, #333)',
-        lineHeight: 1,
-        zIndex: 1001,
-    };
-
-    return (
-        <div ref={gameRef} data-theme={darkMode ? 'dark' : 'light'} style={{ position: 'relative', backgroundColor: 'var(--app-bg, #ffffff)', minHeight: '100vh', paddingTop: '10px' }}>
-            <button
-                style={toggleStyle}
-                onClick={() => setDarkMode(!darkMode)}
-                title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-            >
-                {darkMode ? '☀️' : '🌙'}
-            </button>
-            {confetti.map(p => (
-                <div
-                    key={p.id}
-                    style={{
-                        position: 'fixed',
-                        left: p.left + '%',
-                        top: '-10px',
-                        width: p.size + 'px',
-                        height: p.size + 'px',
-                        backgroundColor: p.color,
-                        borderRadius: p.round ? '50%' : '0',
-                        animation: `confetti-fall ${p.duration}s ease-out ${p.delay}s infinite`,
-                        zIndex: 1000,
-                        pointerEvents: 'none',
-                    }}
-                />
-            ))}
-            <div style={{ textAlign: 'center', marginBottom: '10px' }}>
-                <button
-                    style={mode === '2player' ? activeBtnStyle : btnStyle}
-                    onClick={() => handleModeChange('2player')}
-                >
-                    2 Player
-                </button>
-                <button
-                    style={mode === '1player' ? activeBtnStyle : btnStyle}
-                    onClick={() => handleModeChange('1player')}
-                >
-                    1 Player (vs Computer)
-                </button>
-            </div>
-            <Layout boxes={layout} onClick={handleClick} winning={winningLine} />
-            <div style={styles}>
-                <p style={gameOver ? { ...pStyle, animation: 'pulse-glow 1.5s ease-in-out infinite' } : pStyle}>
-                    {winner ? 'Winner: ' + winner : (turns === 9 ? 'Phew! The Draw logic works' : 'Next Player '
-                        + (xIsNext ? 'X' : 'O'))}
-                </p>
-                {gameOver && (
-                    <button
-                        style={{
-                            padding: '10px 20px',
-                            fontSize: '16px',
-                            cursor: 'pointer',
-                            border: '2px solid var(--play-again-bg, #4CAF50)',
-                            borderRadius: '4px',
-                            backgroundColor: 'var(--play-again-bg, #4CAF50)',
-                            color: 'var(--play-again-text, white)',
-                            animation: 'fade-in 0.5s ease-out',
-                            display: 'block',
-                            margin: '10px auto',
-                        }}
-                        onClick={resetGame}
-                    >
-                        Play Again
-                    </button>
-                )}
-            </div>
+      {/* Scoreboard */}
+      <div className="scoreboard">
+        <div className="score-item x-score">
+          <span className="label">X</span>
+          <span className="value">{scores.X}</span>
         </div>
-    );
+        <div className="score-divider" />
+        <div className="score-item draw-score">
+          <span className="label">Draw</span>
+          <span className="value">{scores.draw}</span>
+        </div>
+        <div className="score-divider" />
+        <div className="score-item o-score">
+          <span className="label">O</span>
+          <span className="value">{scores.O}</span>
+        </div>
+      </div>
+
+      {/* Mode Selector */}
+      <div className="mode-selector">
+        <button
+          className={`mode-btn ${mode === '2player' ? 'active' : ''}`}
+          onClick={() => handleModeChange('2player')}
+        >
+          👥 2 Player
+        </button>
+        <button
+          className={`mode-btn ${mode === '1player' ? 'active' : ''}`}
+          onClick={() => handleModeChange('1player')}
+        >
+          🤖 vs AI
+        </button>
+      </div>
+
+      {/* Board */}
+      <div className="board-wrapper">
+        <Layout
+          boxes={layout}
+          onClick={handleClick}
+          winning={winningLine}
+          gameOver={gameOver}
+        />
+      </div>
+
+      {/* Status */}
+      <div className="status-area" key={turns}>
+        <div className={`status-text ${statusClass}`}>{statusText}</div>
+      </div>
+
+      {/* Actions */}
+      <div className="actions-row">
+        {canUndo && (
+          <button className="btn btn-undo" onClick={handleUndo}>
+            ↩ Undo
+          </button>
+        )}
+        {gameOver && (
+          <button className="btn btn-play-again" onClick={resetGame}>
+            Play Again
+          </button>
+        )}
+      </div>
+
+      {/* Move counter */}
+      {!gameOver && turns > 0 && (
+        <div className="move-counter">
+          Move {turns} of 9
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default Game;
