@@ -201,10 +201,12 @@ function Game({ onScoreUpdate }) {
       <div className="header">
         <span className="header-icon">✦</span>
         <h1>Tic-Tac-Toe</h1>
-        <button className="theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
-          {theme === 'dark' ? '☀️' : '🌙'}
-        </button>
       </div>
+
+      {/* Theme toggle */}
+      <button className="theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
+        {theme === 'dark' ? '☀️' : '🌙'}
+      </button>
 
       {/* Scoreboard */}
       <div className="scoreboard">
@@ -222,6 +224,18 @@ function Game({ onScoreUpdate }) {
           <span className="label">O</span>
           <span className="value">{scores.O}</span>
         </div>
+        <button
+          className="score-reset"
+          onClick={() => {
+            const zero = { X: 0, O: 0, draw: 0 };
+            setScores(zero);
+            saveScores(zero);
+          }}
+          aria-label="Reset scores"
+          title="Reset scores"
+        >
+          ↺
+        </button>
       </div>
 
       {/* Mode Selector */}
