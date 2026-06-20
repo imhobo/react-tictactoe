@@ -4,6 +4,22 @@ import Layout from './Layout';
 
 const STORAGE_KEY = 'tictactoe_scores';
 
+const THEME_KEY = 'tictactoe_theme';
+
+function loadTheme() {
+  try {
+    return localStorage.getItem(THEME_KEY) || 'dark';
+  } catch {
+    return 'dark';
+  }
+}
+
+function saveTheme(theme) {
+  try {
+    localStorage.setItem(THEME_KEY, theme);
+  } catch { /* noop */ }
+}
+
 function loadScores() {
   try {
     const data = localStorage.getItem(STORAGE_KEY);
@@ -28,6 +44,7 @@ function Game({ onScoreUpdate }) {
   const [confetti, setConfetti] = useState([]);
   const [scores, setScores] = useState(loadScores);
   const [history, setHistory] = useState([]); // stack of { layout, xIsNext, turns }
+  const [theme, setTheme] = useState(loadTheme);
   const confettiId = useRef(0);
 
   const winner = checkWinner(layout);
@@ -35,6 +52,12 @@ function Game({ onScoreUpdate }) {
   const isDraw = !winner && turns === 9;
   const gameOver = winner || isDraw;
   const canUndo = mode === '2player' && history.length > 0 && !gameOver && !computerThinking;
+
+  // ── Theme ──
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    saveTheme(theme);
+  }, [theme]);
 
   // ── Confetti ──
   useEffect(() => {
@@ -84,6 +107,10 @@ function Game({ onScoreUpdate }) {
     resetGame();
   }, [resetGame]);
 
+  const toggleTheme = useCallback(() => {
+    setTheme(t => t === 'dark' ? 'light' : 'dark');
+  }, []);
+
   const handleClick = useCallback((i) => {
     if (winner || layout[i] || computerThinking || isDraw) return;
 
@@ -132,7 +159,7 @@ function Game({ onScoreUpdate }) {
 
     return () => { clearTimeout(timer); setComputerThinking(false); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode, xIsNext, winner, isDraw, computerThinking]);
+  }, [mode, xIsNext, winner, isDraw, layout, turns]);
 
   // ── Status text ──
   let statusText = '';
@@ -174,6 +201,9 @@ function Game({ onScoreUpdate }) {
       <div className="header">
         <span className="header-icon">✦</span>
         <h1>Tic-Tac-Toe</h1>
+        <button className="theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
+          {theme === 'dark' ? '☀️' : '🌙'}
+        </button>
       </div>
 
       {/* Scoreboard */}

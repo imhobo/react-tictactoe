@@ -39,6 +39,25 @@
   --transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* ── Light Mode ── */
+[data-theme="light"] {
+  --bg-gradient-1: #e8eaf6;
+  --bg-gradient-2: #f5f5f5;
+  --bg-gradient-3: #ffffff;
+
+  --board-bg: rgba(255, 255, 255, 0.8);
+  --board-border: rgba(0, 0, 0, 0.10);
+  --board-shadow: rgba(0, 0, 0, 0.08);
+
+  --cell-bg: rgba(255, 255, 255, 0.7);
+  --cell-border: rgba(0, 0, 0, 0.08);
+  --cell-hover-bg: rgba(0, 0, 0, 0.04);
+
+  --text-primary: #1a1a2e;
+  --text-secondary: rgba(0, 0, 0, 0.55);
+  --text-muted: rgba(0, 0, 0, 0.30);
+}
+
 /* ── Reset ── */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -83,6 +102,7 @@ body::before {
 
 /* ── Header ── */
 .header {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -104,6 +124,27 @@ body::before {
 .header-icon {
   font-size: 28px;
   opacity: 0.8;
+}
+
+.theme-toggle {
+  position: absolute;
+  right: 24px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--board-border);
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  font-size: 18px;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.theme-toggle:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: scale(1.1);
 }
 
 /* ── Scoreboard ── */
@@ -249,7 +290,6 @@ body::before {
 /* ── X & O Shapes ── */
 .cell-x,
 .cell-o {
-  width: 52px;
   height: 52px;
   position: relative;
 }
@@ -262,7 +302,7 @@ body::before {
   top: 50%;
   left: 50%;
   width: 6px;
-  height: 100%;
+  height: 60%;
   background: var(--x-color);
   border-radius: 3px;
   box-shadow: 0 0 10px var(--x-glow);
@@ -281,14 +321,14 @@ body::before {
 
 @keyframes x-draw {
   0% { height: 0; opacity: 0; }
-  100% { height: 100%; opacity: 1; }
+  100% { height: 60%; opacity: 1; }
 }
 
 /* O: Circle */
 .cell-o::before {
   content: '';
   position: absolute;
-  inset: 0;
+  inset: 20%;
   border: 6px solid var(--o-color);
   border-radius: 50%;
   box-shadow: 0 0 10px var(--o-glow), inset 0 0 10px var(--o-glow);
@@ -443,17 +483,18 @@ body::before {
 
   .cell-x,
   .cell-o {
-    width: 42px;
     height: 42px;
   }
 
   .cell-x::before,
   .cell-x::after {
     width: 5px;
+    height: 60%;
   }
 
   .cell-o::before {
     border-width: 5px;
+    inset: 20%;
   }
 
   .header h1 {
@@ -473,5 +514,12 @@ body::before {
   .btn-play-again {
     padding: 10px 24px;
     font-size: 14px;
+  }
+
+  .theme-toggle {
+    right: 12px;
+    width: 34px;
+    height: 34px;
+    font-size: 16px;
   }
 }
