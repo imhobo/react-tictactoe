@@ -1,0 +1,25 @@
+when:
+  event: push
+  branch: main
+
+steps:
+  - name: install
+    image: bash
+    commands:
+      - npm ci --ignore-scripts
+
+  - name: build
+    image: bash
+    commands:
+      - npm run build
+
+  - name: deploy
+    image: bash
+    commands:
+      - echo "Deploying to droplet..."
+      - hermes-ssh.sh droplet "rm -rf /var/www/webgame/*"
+      - tar czf /tmp/webgame.tar.gz -C build .
+      - hermes-push.sh droplet /tmp/webgame.tar.gz /tmp/webgame.tar.gz
+      - hermes-ssh.sh droplet "tar xzf /tmp/webgame.tar.gz -C /var/www/webgame/ && rm /tmp/webgame.tar.gz"
+      - rm -f /tmp/webgame.tar.gz
+      - echo "Deployed to tic.babymonks.com"
