@@ -6,7 +6,9 @@ steps:
   - name: install
     image: bash
     commands:
-      - npm ci --ignore-scripts
+      - export HOME=/home/ubuntu
+      - rm -rf node_modules
+      - npm install --prefer-offline --no-audit --no-fund
 
   - name: build
     image: bash
@@ -16,24 +18,14 @@ steps:
   - name: artifact
     image: bash
     commands:
+      - export HOME=/home/ubuntu
+      - export GITHUB_TOKEN=__gh_pat__
       - ARTIFACT_VERSION="${CI_PIPELINE_NUMBER:-0}-$(date +%Y%m%d)"
       - ARTIFACT_NAME="react-tictactoe-build-${ARTIFACT_VERSION}"
       - ARTIFACT_FILE="${ARTIFACT_NAME}.tar.gz"
       - cd build && tar czf "/tmp/${ARTIFACT_FILE}" .
       - cd /tmp
-      - |
-        gh auth status 2>/dev/null || gh auth login --with-token <<< "${GITHUB_TOKEN}"
-      - |
-        gh release create "${ARTIFACT_NAME}" \
-          "/tmp/${ARTIFACT_FILE}#${ARTIFACT_FILE}" \
-          --repo imhobo/react-tictactoe \
-          --title "Build ${ARTIFACT_VERSION}" \
-          --notes "Auto-built from commit ${CI_COMMIT_SHA:-unknown}" \
-          --generate-notes 2>/dev/null || \
-        gh release upload "${ARTIFACT_NAME}" \
-          "/tmp/${ARTIFACT_FILE}#${ARTIFACT_FILE}" \
-          --repo imhobo/react-tictactoe \
-          --clobber
+      - gh release create "${ARTIFACT_NAME}" "/tmp/${ARTIFACT_FILE}#${ARTIFACT_FILE}" --repo imhobo/react-tictactoe --title "Build ${ARTIFACT_VERSION}" --notes "Auto-built from commit ${CI_COMMIT_SHA:-unknown}" --generate-notes 2>/dev/null || gh release upload "${ARTIFACT_NAME}" "/tmp/${ARTIFACT_FILE}#${ARTIFACT_FILE}" --repo imhobo/react-tictactoe --clobber
       - rm -f "/tmp/${ARTIFACT_FILE}"
 
   - name: deploy
