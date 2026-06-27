@@ -16,10 +16,9 @@ steps:
   - name: deploy
     image: bash
     commands:
-      - echo "Deploying to droplet..."
-      - hermes-ssh.sh droplet "rm -rf /var/www/webgame/*"
+      - echo "Deploying to racknerd..."
       - tar czf /tmp/webgame.tar.gz -C build .
-      - hermes-push.sh droplet /tmp/webgame.tar.gz /tmp/webgame.tar.gz
-      - hermes-ssh.sh droplet "tar xzf /tmp/webgame.tar.gz -C /var/www/webgame/ && rm /tmp/webgame.tar.gz"
+      - hermes-push.sh racknerd /tmp/webgame.tar.gz /tmp/webgame.tar.gz
+      - hermes-ssh.sh racknerd "rm -rf /opt/babymonks/webgame/* && tar xzf /tmp/webgame.tar.gz -C /opt/babymonks/webgame/ && rm /tmp/webgame.tar.gz"
       - rm -f /tmp/webgame.tar.gz
       - echo "Deployed to tic.babymonks.com"
