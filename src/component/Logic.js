@@ -1,16 +1,11 @@
+const LINES = [
+  [0, 1, 2], [3, 4, 5], [6, 7, 8],
+  [0, 3, 6], [1, 4, 7], [2, 5, 8],
+  [0, 4, 8], [2, 4, 6],
+];
+
 export function checkWinner(boxes) {
-  const lines = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6],
-  ];
-  for (let i = 0; i < lines.length; i++) {
-    const [x, y, z] = lines[i];
+  for (const [x, y, z] of LINES) {
     if (boxes[x] && boxes[x] === boxes[y] && boxes[x] === boxes[z]) {
       return boxes[x];
     }
@@ -18,45 +13,69 @@ export function checkWinner(boxes) {
   return null;
 }
 
+export function getWinningLine(boxes) {
+  for (const line of LINES) {
+    const [x, y, z] = line;
+    if (boxes[x] && boxes[x] === boxes[y] && boxes[x] === boxes[z]) {
+      return line;
+    }
+  }
+  return [];
+}
+
+/* ── Minimax AI (unbeatable) ── */
+
+function getAvailable(boxes) {
+  return boxes.reduce((acc, b, i) => (b === null ? [...acc, i] : acc), []);
+}
+
+function checkResult(boxes) {
+  for (const [x, y, z] of LINES) {
+    if (boxes[x] && boxes[x] === boxes[y] && boxes[x] === boxes[z]) {
+      return boxes[x] === 'O' ? 10 : -10;
+    }
+  }
+  return 0;
+}
+
+function minimax(boxes, depth, isMaximizing) {
+  const result = checkResult(boxes);
+  if (result !== 0) return result;
+  if (getAvailable(boxes).length === 0) return 0;
+
+  if (isMaximizing) {
+    let best = -Infinity;
+    for (const i of getAvailable(boxes)) {
+      boxes[i] = 'O';
+      best = Math.max(best, minimax(boxes, depth + 1, false));
+      boxes[i] = null;
+    }
+    return best;
+  } else {
+    let best = Infinity;
+    for (const i of getAvailable(boxes)) {
+      boxes[i] = 'X';
+      best = Math.min(best, minimax(boxes, depth + 1, true));
+      boxes[i] = null;
+    }
+    return best;
+  }
+}
+
 export function getComputerMove(boxes) {
-  const lines = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6],
-  ];
+  let bestScore = -Infinity;
+  let bestMove = null;
 
-  for (let [a, b, c] of lines) {
-    if (boxes[a] === 'O' && boxes[b] === 'O' && boxes[c] === null) return c;
-    if (boxes[a] === 'O' && boxes[c] === 'O' && boxes[b] === null) return b;
-    if (boxes[b] === 'O' && boxes[c] === 'O' && boxes[a] === null) return a;
+  for (const i of getAvailable(boxes)) {
+    boxes[i] = 'O';
+    const score = minimax([...boxes], 0, false);
+    boxes[i] = null;
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestMove = i;
+    }
   }
 
-  for (let [a, b, c] of lines) {
-    if (boxes[a] === 'X' && boxes[b] === 'X' && boxes[c] === null) return c;
-    if (boxes[a] === 'X' && boxes[c] === 'X' && boxes[b] === null) return b;
-    if (boxes[b] === 'X' && boxes[c] === 'X' && boxes[a] === null) return a;
-  }
-
-  if (boxes[4] === null) return 4;
-
-  const corners = [0, 2, 6, 8];
-  const emptyCorners = corners.filter(i => boxes[i] === null);
-  if (emptyCorners.length > 0) {
-    return emptyCorners[Math.floor(Math.random() * emptyCorners.length)];
-  }
-
-  const empty = boxes.reduce((acc, box, i) => {
-    if (box === null) acc.push(i);
-    return acc;
-  }, []);
-  if (empty.length > 0) {
-    return empty[Math.floor(Math.random() * empty.length)];
-  }
-
-  return null;
+  return bestMove;
 }

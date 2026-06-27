@@ -6,12 +6,19 @@ steps:
   - name: install
     image: bash
     commands:
-      - npm ci --ignore-scripts
+      - export HOME=/home/ubuntu
+      - rm -rf node_modules
+      - npm install --prefer-offline --no-audit --no-fund
 
   - name: build
     image: bash
     commands:
       - npm run build
+
+  - name: artifact
+    image: bash
+    commands:
+      - bash scripts/upload-artifact.sh
 
   - name: deploy
     image: bash
